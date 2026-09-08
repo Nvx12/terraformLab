@@ -5,10 +5,6 @@ on:
     branches:
       - master
 
-  push:
-    branches:
-      - master
-
 permissions:
   contents: read
 
@@ -17,9 +13,6 @@ env:
 
 jobs:
 
-  # ============================================================
-  # TERRAFORM CHECK
-  # ============================================================
   terraform-check:
     name: "Check - ${{ matrix.environment }}"
     runs-on: ubuntu-latest
@@ -53,10 +46,6 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-
-  # ============================================================
-  # TERRAFORM PLAN
-  # ============================================================
   terraform-plan:
     name: "Plan - ${{ matrix.environment }}"
     runs-on: ubuntu-latest
@@ -98,10 +87,6 @@ jobs:
           TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
         run: terraform plan
 
-
-  # ============================================================
-  # PRODUCTION APPLY
-  # ============================================================
   terraform-apply:
     name: "Apply - Production"
     runs-on: ubuntu-latest
@@ -109,7 +94,7 @@ jobs:
     needs:
       - terraform-check
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     environment:
       name: production
