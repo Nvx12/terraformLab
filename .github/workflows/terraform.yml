@@ -3,11 +3,11 @@ name: Terraform
 on:
   pull_request:
     branches:
-      - master
+      - main
 
   push:
     branches:
-      - master
+      - main
 
 permissions:
   contents: read
@@ -17,6 +17,9 @@ env:
 
 jobs:
 
+  # ============================================================
+  # TERRAFORM CHECK
+  # ============================================================
   terraform-check:
     name: "Check - ${{ matrix.environment }}"
     runs-on: ubuntu-latest
@@ -34,6 +37,7 @@ jobs:
         working-directory: environments/${{ matrix.environment }}
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -43,12 +47,16 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend=false
 
-      - name: Terraform Format Check
+      - name: Terraform Format
         run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
 
+
+  # ============================================================
+  # TERRAFORM PLAN
+  # ============================================================
   terraform-plan:
     name: "Plan - ${{ matrix.environment }}"
     runs-on: ubuntu-latest
@@ -73,6 +81,7 @@ jobs:
         working-directory: environments/${{ matrix.environment }}
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -87,20 +96,12 @@ jobs:
       - name: Terraform Plan
         env:
           TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
-        run: |
-          terraform plan \
-            -out=tfplan
+        run: terraform plan
 
-      - name: Show Terraform Plan
-        run: terraform show -no-color tfplan
 
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan-${{ matrix.environment }}
-          path: environments/${{ matrix.environment }}/tfplan
-          retention-days: 5
-
+  # ============================================================
+  # PRODUCTION APPLY
+  # ============================================================
   terraform-apply:
     name: "Apply - Production"
     runs-on: ubuntu-latest
@@ -118,6 +119,7 @@ jobs:
         working-directory: environments/prod
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -132,14 +134,9 @@ jobs:
       - name: Terraform Plan
         env:
           TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
-        run: |
-          terraform plan \
-            -out=tfplan
-
-      - name: Show Terraform Plan
-        run: terraform show -no-color tfplan
+        run: terraform plan
 
       - name: Terraform Apply
         env:
           TF_VAR_postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve
