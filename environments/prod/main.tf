@@ -10,7 +10,7 @@ terraform {
 provider "docker" {}
 
 module "docker_services" {
-  source = "../../modules/docker-services"
+  source = "git::https://github.com/Nvx12/terraformLab.git//modules/docker-services?ref=master"
 
   environment       = var.environment
   services          = var.services
