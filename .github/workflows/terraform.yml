@@ -1,0 +1,39 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform-check:
+    name: Terraform checks
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+
+    defaults:
+      run:
+        working-directory: environments/${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
