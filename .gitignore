@@ -7,3 +7,6 @@ crash.log
 crash.*.log
 # Secrets
 *.secret.tfvars
+
+tfplan
+*.tfplan
