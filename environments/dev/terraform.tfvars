@@ -17,6 +17,8 @@ services = {
     image         = "postgres:16-alpine"
     internal_port = 5432
     external_port = 5432
+    persistent    = true
+    mount_path    = "/var/lib/postgresql/data"
 
     environment = [
       "POSTGRES_USER=terraform",

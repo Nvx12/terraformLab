@@ -16,6 +16,11 @@ resource "docker_image" "service" {
   name = each.value.image
 }
 
+resource "docker_volume" "data" {
+  for_each = { for k, v in var.services : k => v if v.persistent }
+  name     = "terraform-${var.environment}-${each.key}-data"
+}
+
 resource "docker_container" "service" {
   for_each = var.services
 
@@ -36,3 +41,11 @@ resource "docker_container" "service" {
     external = each.value.external_port
   }
 }
+
+  dynamic "volumes" {
+      for_each = each.value.persistent ? [1] : []
+      content {
+        volume_name    = docker_volume.data[each.key].name
+        container_path = each.value.mount_path
+      }
+    }

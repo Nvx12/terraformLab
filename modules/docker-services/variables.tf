@@ -17,5 +17,7 @@ variable "services" {
     internal_port = number
     external_port = number
     environment   = optional(list(string), [])
+    persistent    = optional(bool, false)
+    mount_path    = optional(string, null)
   }))
 }
