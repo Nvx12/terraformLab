@@ -31,6 +31,14 @@ resource "docker_container" "service" {
     name = docker_network.lab.name
   }
 
+  dynamic "volumes" {
+      for_each = each.value.persistent ? [1] : []
+      content {
+        volume_name    = docker_volume.data[each.key].name
+        container_path = each.value.mount_path
+      }
+    }
+
   env = each.key == "postgres" ? concat(
     each.value.environment,
     ["POSTGRES_PASSWORD=${var.postgres_password}"]
@@ -42,10 +50,4 @@ resource "docker_container" "service" {
   }
 }
 
-  dynamic "volumes" {
-      for_each = each.value.persistent ? [1] : []
-      content {
-        volume_name    = docker_volume.data[each.key].name
-        container_path = each.value.mount_path
-      }
-    }
+  
