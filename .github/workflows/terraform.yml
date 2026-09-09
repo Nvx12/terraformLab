@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+  push:
+    branches:
+      - master
+
 permissions:
   contents: read
 
@@ -89,7 +93,7 @@ jobs:
         run: terraform plan
 
   terraform-apply:
-    name: "Apply - Production"
+    name: "Apply - ${{ matrix.environment }}"
     runs-on: ubuntu-latest
 
     needs:
@@ -97,12 +101,19 @@ jobs:
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
-    environment:
-      name: production
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+
+    environment: ${{ matrix.environment }}
 
     defaults:
       run:
-        working-directory: environments/prod
+        working-directory: environments/${{ matrix.environment }}
 
     steps:
 
